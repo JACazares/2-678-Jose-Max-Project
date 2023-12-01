@@ -1,9 +1,3 @@
-// 2.678 - Lab 10: Motor Speed Control Template
-// Global declarations (accessible to all functions).
-// Based on the Arduino connections shown 1n the handout.
-// Note that pins 11 (PWMA) and 5 (PWMB) are both Arduino PWM pins.
-// Note:   We will only use motor A in this lab
-
 const int AIN1  = 9;
 const int AIN2  = 10;
 const int PWMA  = 11;
@@ -107,3 +101,4 @@ void motorWrite(int motorSpeed, int xIN1, int xIN2, int PWMx)
     motorSpeed = constrain(motorSpeed, 0, 255);   // Just in case...
     analogWrite(PWMx, motorSpeed);
 }
+

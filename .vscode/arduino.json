@@ -1,6 +1,0 @@
-{
-    "port": "COM16",
-    "configuration": "cpu=atmega328",
-    "board": "arduino:avr:nano",
-    "sketch": "sketch_nov03a\\sketch_nov03a.ino"
-}
