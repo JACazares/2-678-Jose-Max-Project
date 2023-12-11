@@ -17,45 +17,85 @@ void setup() {
   pinMode(PWMB, OUTPUT);
   pinMode(STDBY, OUTPUT);
    // whatever else you need to do...
+  pinMode(4, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(2, OUTPUT);
+
+  digitalWrite(4, LOW);
+  digitalWrite(3, LOW);
+  digitalWrite(2, LOW);
   
   digitalWrite(STDBY, HIGH);
   Serial.begin(9600);
 }
 
 int baseMotorSpeed = 125;
-int tresholdDifference = 40;
+int tresholdDifference = 60;
+int offLineDelay = 300;
 double turnConstant = 0.25;
 int sensorLeft, sensorMiddle, sensorRight;
 
 int offLineCounter = 0;
-bool offLine = false, turning = false;
+bool offLine = false, turning = false, startLoop = false, onNarrow = false;
 static unsigned long offLineTimer = 0, turningTimer = 0;
+unsigned long loopTimer = 0;
 
 void turn(int& motorSpeedLeft, int& motorSpeedRight)
 {
-  if(offLineCounter > 5)
+  if(offLineCounter > 4)
   {
     motorSpeedLeft = 0;
     motorSpeedRight = 0;
     return;
   }
-  else if(offLine && offLineCounter < 1)
+  /*else if(offLine && offLineCounter < 3)
   {
     motorSpeedLeft = 255;
     motorSpeedRight = 255;
     return;
-  }
-  else if (offLine && offLineCounter == 2)
+  }*/
+  else if (offLine && offLineCounter == 1)
   {
     motorSpeedLeft = -255;
     motorSpeedRight = 255;
     return;
   }
-  else if (offLine && offLineCounter < 5)
+  else if (offLine && offLineCounter == 2)
+  {
+    motorSpeedLeft = 255;
+    motorSpeedRight = -255;
+
+    // Now shorten off line delay to ensure we go around the loop
+    offLineDelay = 75;
+    return;
+  }
+  else if (offLine && offLineCounter == 3)
+  {
+    motorSpeedLeft = 255;
+    motorSpeedRight = -255;
+    startLoop = true;
+    loopTimer = millis();
+    return;
+  }
+  else if (offLine && offLineCounter == 4)
   {
     motorSpeedLeft = 255;
     motorSpeedRight = -255;
     return;
+  }
+
+  if (startLoop)
+  {
+    if (millis() - loopTimer < 300)
+    {
+      motorSpeedLeft = 255;
+      motorSpeedRight = -255;
+      return;
+    }
+    else
+    {
+      startLoop = false;
+    }
   }
 
   int difference = sensorRight - sensorLeft;
@@ -73,10 +113,14 @@ void turn(int& motorSpeedLeft, int& motorSpeedRight)
   {
     if(turningTimer == 0)
       turningTimer = millis();
-    else if(millis() - turningTimer > 75 && !turning)
+    else if(millis() - turningTimer > 100 && !turning)
     {
       turning = true;
-      turnConstant = 0.25 + (double)(millis() - turningTimer)/500.0;
+    }
+
+    if (turning) 
+    {
+      turnConstant = 0.25 + (double)(millis() - turningTimer)/1000.0;
     }
 
     if(sensorMiddle < 700 && (sensorLeft > 500 || sensorRight > 500))
@@ -104,7 +148,7 @@ void checkOffLine()
   {
     if(offLineTimer == 0)
       offLineTimer = millis();
-    else if(millis() - offLineTimer > 200 && !offLine)
+    else if(millis() - offLineTimer > offLineDelay && !offLine)
     {
       offLineCounter++;
       offLine = true;
@@ -135,6 +179,25 @@ void loop() {
 //  Serial.print(" ");
 //  Serial.println(motorSpeedRight);
   Serial.println(offLineCounter);
+
+  if (offLineCounter % 3 == 1)
+  {
+    digitalWrite(4, HIGH);
+    digitalWrite(3, LOW);
+    digitalWrite(2, LOW);
+  }
+  else if (offLineCounter % 3 == 2)
+  {
+    digitalWrite(4, LOW);
+    digitalWrite(3, HIGH);
+    digitalWrite(2, LOW);
+  }
+  else if (offLineCounter % 3 == 0)
+  {
+    digitalWrite(4, LOW);
+    digitalWrite(3, LOW);
+    digitalWrite(2, HIGH);
+  }
 
   // int sensorDifference = -(100.0/(double)sensorRight - 100.0/(double)sensorLeft)*1000.0;
   // >> 0, right > left -> turn right
