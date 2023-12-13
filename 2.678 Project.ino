@@ -42,25 +42,25 @@ unsigned long loopTimer = 0;
 
 void turn(int& motorSpeedLeft, int& motorSpeedRight)
 {
-  if(offLineCounter > 4)
+  if(offLineCounter > 7)
   {
     motorSpeedLeft = 0;
     motorSpeedRight = 0;
     return;
   }
-  /*else if(offLine && offLineCounter < 3)
+  else if(offLine && offLineCounter < 3)
   {
     motorSpeedLeft = 255;
     motorSpeedRight = 255;
     return;
-  }*/
-  else if (offLine && offLineCounter == 1)
+  }
+  else if (offLine && offLineCounter == 3)
   {
     motorSpeedLeft = -255;
     motorSpeedRight = 255;
     return;
   }
-  else if (offLine && offLineCounter == 2)
+  else if (offLine && offLineCounter == 4)
   {
     motorSpeedLeft = 255;
     motorSpeedRight = -255;
@@ -69,15 +69,17 @@ void turn(int& motorSpeedLeft, int& motorSpeedRight)
     offLineDelay = 75;
     return;
   }
-  else if (offLine && offLineCounter == 3)
+  else if (offLine && offLineCounter == 5)
   {
     motorSpeedLeft = 255;
     motorSpeedRight = -255;
     startLoop = true;
     loopTimer = millis();
+
+    offLineDelay = 200;
     return;
   }
-  else if (offLine && offLineCounter == 4)
+  else if (offLine && offLineCounter == 6)
   {
     motorSpeedLeft = 255;
     motorSpeedRight = -255;
@@ -102,8 +104,8 @@ void turn(int& motorSpeedLeft, int& motorSpeedRight)
 
   if(abs(difference) < tresholdDifference && !offLine)
   {
-    motorSpeedLeft = 255;
-    motorSpeedRight = 255;
+    motorSpeedLeft = baseMotorSpeed;
+    motorSpeedRight = baseMotorSpeed;
 
     turningTimer = 0;
     turning = false;
@@ -143,7 +145,7 @@ void turn(int& motorSpeedLeft, int& motorSpeedRight)
 
 void checkOffLine()
 {
-  int sensorOffTreshold = 500;
+  int sensorOffTreshold = 400;
   if(sensorMiddle < sensorOffTreshold && sensorLeft < sensorOffTreshold && sensorRight < sensorOffTreshold && !turning)
   {
     if(offLineTimer == 0)
@@ -203,11 +205,11 @@ void loop() {
   // >> 0, right > left -> turn right
   // << 0, right < left -> turn left
 
-  // Serial.print(sensorLeft);
-  // Serial.print(' ');
-  // Serial.print(sensorMiddle);
-  // Serial.print(' ');
-  // Serial.println(sensorRight);
+  Serial.print(sensorLeft);
+  Serial.print(' ');
+  Serial.print(sensorMiddle);
+  Serial.print(' ');
+  Serial.println(sensorRight);
 
   // if(leftSpeeding && rightSpeeding)
   // {
